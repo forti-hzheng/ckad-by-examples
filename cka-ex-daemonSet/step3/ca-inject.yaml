@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: ca-cert-install
+spec:
+  selector:
+    matchLabels:
+      app: ca-cert-install
+  template:
+    metadata:
+      labels:
+        app: ca-cert-install
+    spec:
+      containers:
+      - name: ca-cert-install
+        image: quay.io/coreos/cert-manager-cainjector:v1.5.0
+        command:
+        - /usr/local/bin/cert-manager-cainjector
+        args:
+        - --v=2
+        - --inject-ca-from=/etc/kubernetes/pki/ca.crt
+        volumeMounts:
+        - name: ca-cert
+          mountPath: /etc/kubernetes/pki/ca.crt
+          subPath: ca.crt
+      volumes:
+      - name: ca-cert
+        secret:
+          secretName: ca-cert
